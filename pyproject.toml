@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "configui"
+dynamic = ["version", "license"]
+description = 'A tool that turns any yaml or json configs into tui'
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+authors = [
+    { name = "Chenchao Zhao", email = "chenchao.zhao.dev+github@gmail.com" },
+]
+
+[tool.hatch.version]
+path = "src/configui/__about__.py"
+
+[tool.hatch.envs.default]
+type = "pip-compile"
+python = "3.12"
+dependencies = ["pytest", "mypy", "ruff"]
+
+[tool.hatch.envs.default.scripts]
+typing = "mypy --install-types --non-interactive src/"
+release = ["hatch fmt", "typing", "hatch test --cover"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/configui"]
