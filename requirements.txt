@@ -4,6 +4,9 @@
 # - pytest
 # - mypy
 # - ruff
+# - textual>=1.0.0
+# - ruamel.yaml>=0.18.0
+# - tomlkit>=0.13.0
 #
 
 ast-serialize==0.3.0
@@ -12,6 +15,17 @@ iniconfig==2.3.0
     # via pytest
 librt==0.11.0
     # via mypy
+linkify-it-py==2.1.0
+    # via markdown-it-py
+markdown-it-py==4.2.0
+    # via
+    #   mdit-py-plugins
+    #   rich
+    #   textual
+mdit-py-plugins==0.6.1
+    # via textual
+mdurl==0.1.2
+    # via markdown-it-py
 mypy==2.1.0
     # via hatch.envs.default
 mypy-extensions==1.1.0
@@ -20,13 +34,30 @@ packaging==26.2
     # via pytest
 pathspec==1.1.1
     # via mypy
+platformdirs==4.9.6
+    # via textual
 pluggy==1.6.0
     # via pytest
 pygments==2.20.0
-    # via pytest
+    # via
+    #   pytest
+    #   rich
+    #   textual
 pytest==9.0.3
+    # via hatch.envs.default
+rich==15.0.0
+    # via textual
+ruamel-yaml==0.19.1
     # via hatch.envs.default
 ruff==0.15.12
     # via hatch.envs.default
+textual==8.2.6
+    # via hatch.envs.default
+tomlkit==0.15.0
+    # via hatch.envs.default
 typing-extensions==4.15.0
-    # via mypy
+    # via
+    #   mypy
+    #   textual
+uc-micro-py==2.0.0
+    # via linkify-it-py
