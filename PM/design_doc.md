@@ -1,4 +1,4 @@
-# Design Document: **ConfigUI**
+# Design Document: ConfigUI
 
 **ConfigUI** is a CLI-driven terminal user interface (TUI) designed to bridge the gap between manual text editing and complex configuration management. It provides a visual, type-aware environment for editing YAML, JSON, and TOML files without the overhead of a full IDE or the friction of a standard text editor.
 
@@ -85,7 +85,3 @@ The interface will be powered by [Textual](https://textual.textualize.io).
 4. **Phase 2 - YAML & TOML:** Implement strategies with full comment and style preservation.
 5. **TUI Development:** Build the dynamic form generator and navigation logic in Textual.
 6. **Distribution:** Finalize documentation (README) and publish the initial version to PyPI.
-
----
-
-This design ensures that **ConfigUI** remains a focused, "do one thing well" utility that simplifies the life of anyone living in config files.
