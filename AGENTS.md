@@ -242,3 +242,10 @@ Before submitting changes:
 - `requirements.txt` is auto-generated — do not edit manually
 - Dependencies go in `pyproject.toml`, not in `requirements.txt`
 - Never leave project in state where `hatch fmt` or `hatch test` fails
+
+## For This Project
+
+- Read project management files in `PM/`
+- The project design doc is `PM/design_doc.md`
+- The task tickets are `PM/tasks/CUI-*.md`
+- When a subtask is finished, remember to check the box
