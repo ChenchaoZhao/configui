@@ -61,8 +61,6 @@ To support multiple formats while keeping the codebase extensible, we will use a
 * **TOML:** `tomlkit` (designed to preserve style and comments).
 * **JSON:** Standard library `json` (as comments are not natively supported).
 
-
-
 #### TUI Architecture
 
 The interface will be powered by [Textual](https://textual.textualize.io).
@@ -71,8 +69,6 @@ The interface will be powered by [Textual](https://textual.textualize.io).
 * `bool` $\rightarrow$ **Checkbox** or **Switch**.
 * `float`, `int`, `str` $\rightarrow$ **Input Box**.
 * **Nested Structures** $\rightarrow$ **Collapsible** containers.
-
-
 * **Theming:** User-configurable themes implemented via a Strategy Pattern to swap CSS definitions dynamically.
 
 ---
