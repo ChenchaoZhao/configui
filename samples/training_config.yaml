@@ -1,0 +1,40 @@
+# Model architecture
+model:
+  architecture: resnet50
+  pretrained: true
+  num_classes: 1000
+  dropout: 0.5
+
+# Training hyperparameters
+training:
+  batch_size: 64
+  epochs: 100
+  learning_rate: 0.001
+  use_cuda: true
+  use_mixed_precision: false
+  seed: 42
+  metrics: [accuracy, f1, loss]
+  lr_scheduler:
+    type: cosine
+    warmup_steps: 500
+    min_lr: 1e-6
+
+# Optimizer settings
+optimizer:
+  name: adamw
+  lr: 0.001
+  weight_decay: 0.01
+  momentum: 0.9
+  betas: [0.9, 0.999]
+
+# Dataset configuration
+dataset:
+  name: imagenet
+  root: /data/imagenet
+  augmentation:
+    random_crop: true
+    random_flip: true
+    color_jitter: 0.1
+    normalize: true
+  num_workers: 4
+  pin_memory: true
