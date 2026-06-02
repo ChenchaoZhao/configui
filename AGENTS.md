@@ -250,4 +250,4 @@ Before submitting changes:
 - The task tickets are `PM/tasks/CUI-*.md`
 - When a subtask is finished, remember to check the box
 - You MUST draft your plan first and update the ticket before doing anything
-- You MUST NOT write code before formulating the plan and get human approval
+- You MUST NOT write code before formulating the plan
