@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any
 
-from configui.config.protocol import Config
+from configui.config._protocol import Config
 
 
 class SubclassConfig(Config):

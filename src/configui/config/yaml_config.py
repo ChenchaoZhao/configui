@@ -7,7 +7,7 @@ from ruamel.yaml import YAML
 from ruamel.yaml.error import YAMLError
 
 from configui.config._atomic import atomic_write
-from configui.config.protocol import Config
+from configui.config._protocol import Config
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
