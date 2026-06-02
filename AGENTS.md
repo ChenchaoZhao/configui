@@ -249,3 +249,5 @@ Before submitting changes:
 - The project design doc is `PM/design_doc.md`
 - The task tickets are `PM/tasks/CUI-*.md`
 - When a subtask is finished, remember to check the box
+- You MUST draft your plan first and update the ticket before doing anything
+- You MUST NOT write code before formulating the plan
