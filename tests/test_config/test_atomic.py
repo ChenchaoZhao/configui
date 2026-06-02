@@ -1,8 +1,62 @@
+# ruff: noqa: SLF001
+
 from pathlib import Path
 
 import pytest
 
-from configui.config._atomic import atomic_write
+from configui.config._atomic import atomic_update, atomic_write
+
+
+class TestAtomicUpdate:
+    def test_updates_existing_keys(self) -> None:
+        data: dict[str, str] = {"a": "1", "b": "2"}
+        atomic_update(data, {"a": "10", "b": "20"}, allow_new_keys=False, allow_missing_keys=True)
+        assert data == {"a": "10", "b": "20"}
+
+    def test_raises_on_extra_key(self) -> None:
+        data: dict[str, str] = {"a": "1"}
+        with pytest.raises(KeyError, match="Keys not found in config"):
+            atomic_update(data, {"a": "1", "b": "2"}, allow_new_keys=False, allow_missing_keys=True)
+        assert data == {"a": "1"}
+
+    def test_adds_new_key_when_allowed(self) -> None:
+        data: dict[str, str] = {"a": "1"}
+        atomic_update(data, {"a": "10", "b": "20"}, allow_new_keys=True, allow_missing_keys=True)
+        assert data == {"a": "10", "b": "20"}
+
+    def test_raises_on_missing_key(self) -> None:
+        data: dict[str, str] = {"a": "1", "b": "2"}
+        with pytest.raises(KeyError, match="Missing keys in update"):
+            atomic_update(data, {"a": "10"}, allow_new_keys=True, allow_missing_keys=False)
+        assert data == {"a": "1", "b": "2"}
+
+    def test_exact_match_succeeds(self) -> None:
+        data: dict[str, str] = {"a": "1", "b": "2"}
+        atomic_update(data, {"a": "10", "b": "20"}, allow_new_keys=False, allow_missing_keys=False)
+        assert data == {"a": "10", "b": "20"}
+
+    def test_preserves_data_on_failure(self) -> None:
+        data: dict[str, str] = {"a": "1"}
+        with pytest.raises(KeyError):
+            atomic_update(data, {"b": "2"}, allow_new_keys=False, allow_missing_keys=True)
+        assert data == {"a": "1"}
+
+    def test_empty_data_raises_key_error(self) -> None:
+        data: dict[str, str] = {}
+        with pytest.raises(KeyError, match="Keys not found in config"):
+            atomic_update(data, {"a": "1"}, allow_new_keys=False, allow_missing_keys=True)
+        assert data == {}
+
+    def test_env_defaults(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        import configui.config._atomic as m  # noqa: PLC0415 — need module ref for setattr
+
+        monkeypatch.setattr(m, "_ALLOW_NEW_KEYS", False)
+        monkeypatch.setattr(m, "_ALLOW_MISSING_KEYS", False)
+        data: dict[str, str] = {"a": "1", "b": "2"}
+        m.atomic_update(
+            data, {"a": "10", "b": "20"}, allow_new_keys=m._ALLOW_NEW_KEYS, allow_missing_keys=m._ALLOW_MISSING_KEYS
+        )
+        assert data == {"a": "10", "b": "20"}
 
 
 class TestAtomicWrite:

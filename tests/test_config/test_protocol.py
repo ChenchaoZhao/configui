@@ -15,6 +15,10 @@ class SubclassConfig(Config):
 
     def save_as(self, new_path: Path, **kwargs: Any) -> None: ...
 
+    def update(
+        self, data: dict[str, Any], *, allow_new_keys: bool | None = None, allow_missing_keys: bool | None = None
+    ) -> None: ...
+
 
 def test_config_is_a_protocol() -> None:
     assert isinstance(Config, type)

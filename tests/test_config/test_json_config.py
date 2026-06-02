@@ -103,6 +103,17 @@ class TestJsonConfig:
         assert new_path.read_text() == '{\n  "key": "value"\n}'
         assert config._path == path
 
+    def test_update_round_trip(self, tmp_path: Path) -> None:
+        path = tmp_path / "config.json"
+        path.write_text('{"key": "value"}')
+        config = JsonConfig(path)
+        config.load()
+        config.update({"key": "new_value"})
+        config.save()
+        config2 = JsonConfig(path)
+        config2.load()
+        assert config2._data == {"key": "new_value"}
+
     def test_round_trip_preserves_data(self, tmp_path: Path) -> None:
         original = {"name": "test", "count": 42, "nested": {"flag": True}}
         path = tmp_path / "config.json"
