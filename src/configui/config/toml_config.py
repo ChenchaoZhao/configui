@@ -6,17 +6,17 @@ from typing import TYPE_CHECKING, Any
 import tomlkit
 from tomlkit.exceptions import TOMLKitError
 
-from configui.config._atomic import atomic_write
+from configui.config._atomic import _ALLOW_MISSING_KEYS, _ALLOW_NEW_KEYS, atomic_update, atomic_write
 from configui.config._protocol import Config
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import MutableMapping
 
 
 class TomlConfig(Config):
     def __init__(self, path: str | Path) -> None:
         self._path = Path(path)
-        self._data: Mapping[str, Any] = {}
+        self._data: MutableMapping[str, Any] = {}
 
     def load(self, **kwargs: Any) -> None:
         try:
@@ -30,3 +30,10 @@ class TomlConfig(Config):
 
     def save_as(self, new_path: Path, **_kwargs: Any) -> None:
         atomic_write(new_path, lambda f: tomlkit.dump(self._data, f))
+
+    def update(
+        self, data: dict[str, Any], *, allow_new_keys: bool | None = None, allow_missing_keys: bool | None = None
+    ) -> None:
+        _allow_new = allow_new_keys if allow_new_keys is not None else _ALLOW_NEW_KEYS
+        _allow_missing = allow_missing_keys if allow_missing_keys is not None else _ALLOW_MISSING_KEYS
+        atomic_update(self._data, data, allow_new_keys=_allow_new, allow_missing_keys=_allow_missing)

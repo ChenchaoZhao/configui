@@ -111,6 +111,17 @@ class TestYamlConfig:
         assert "&defaults" in saved
         assert "*defaults" in saved
 
+    def test_update_round_trip(self, tmp_path: Path) -> None:
+        path = tmp_path / "config.yaml"
+        path.write_text("key: value\n")
+        config = YamlConfig(path)
+        config.load()
+        config.update({"key": "new_value"})
+        config.save()
+        config2 = YamlConfig(path)
+        config2.load()
+        assert config2._data == {"key": "new_value"}
+
     def test_round_trip_preserves_data(self, tmp_path: Path) -> None:
         path = tmp_path / "config.yaml"
         config = YamlConfig(path)
