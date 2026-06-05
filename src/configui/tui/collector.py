@@ -54,8 +54,17 @@ def _collect(widget: Horizontal | Collapsible, container: dict[str, Any] | list[
             container.append(sub)
 
 
+def _unwrap(root: Vertical) -> Vertical:
+    """Unwrap a single wrapper Vertical, if present."""
+    children = list(root.children)
+    if len(children) == 1 and isinstance(children[0], Vertical):
+        return cast("Vertical", children[0])
+    return root
+
+
 def map_widgets_to_config(root: Vertical) -> dict[str, Any]:
     result: dict[str, Any] = {}
-    for child in root.children:
+    target = _unwrap(root)
+    for child in target.children:
         _collect(cast("Horizontal | Collapsible", child), result)
     return result

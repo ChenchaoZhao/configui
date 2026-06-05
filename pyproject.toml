@@ -12,6 +12,7 @@ authors = [
     { name = "Chenchao Zhao", email = "chenchao.zhao.dev+github@gmail.com" },
 ]
 dependencies = [
+    "click>=8.1.0",
     "textual>=1.0.0",
     "ruamel.yaml>=0.18.0",
     "tomlkit>=0.13.0",
@@ -31,6 +32,9 @@ release = ["hatch fmt", "typing", "hatch test --cover"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[project.scripts]
+configui = "configui.tui.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/configui"]
