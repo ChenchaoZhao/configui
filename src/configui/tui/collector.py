@@ -10,9 +10,9 @@ def _extract_value(widget: Switch | Input) -> Any:
     if isinstance(widget, Switch):
         return widget.value
     if widget.type == "integer":
-        return int(widget.value)
+        return int(widget.value) if widget.value else 0
     if widget.type == "number":
-        return float(widget.value)
+        return float(widget.value) if widget.value else 0.0
     return widget.value
 
 

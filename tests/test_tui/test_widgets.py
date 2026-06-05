@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import re
 from typing import Any
 
 from textual.app import App
@@ -205,6 +206,33 @@ class TestRegexOverrides:
         assert lr["restrict"] == r"^\d+\.\d+$"
         momentum = next(i for i in items if i["id"] == "momentum")
         assert momentum["restrict"] == DEFAULT_FLOAT_RESTRICT
+
+
+class TestRestrictRegex:
+    def test_int_restrict_allows_empty(self) -> None:
+        assert re.fullmatch(DEFAULT_INT_RESTRICT, "") is not None
+
+    def test_int_restrict_allows_digits(self) -> None:
+        assert re.fullmatch(DEFAULT_INT_RESTRICT, "42") is not None
+        assert re.fullmatch(DEFAULT_INT_RESTRICT, "0") is not None
+        assert re.fullmatch(DEFAULT_INT_RESTRICT, "-5") is not None
+
+    def test_int_restrict_rejects_non_digits(self) -> None:
+        assert re.fullmatch(DEFAULT_INT_RESTRICT, "abc") is None
+        assert re.fullmatch(DEFAULT_INT_RESTRICT, "12.5") is None
+
+    def test_float_restrict_allows_empty(self) -> None:
+        assert re.fullmatch(DEFAULT_FLOAT_RESTRICT, "") is not None
+
+    def test_float_restrict_allows_numbers(self) -> None:
+        assert re.fullmatch(DEFAULT_FLOAT_RESTRICT, "3.14") is not None
+        assert re.fullmatch(DEFAULT_FLOAT_RESTRICT, "42") is not None
+        assert re.fullmatch(DEFAULT_FLOAT_RESTRICT, "-0.5") is not None
+        assert re.fullmatch(DEFAULT_FLOAT_RESTRICT, "1e10") is not None
+
+    def test_float_restrict_rejects_alpha(self) -> None:
+        assert re.fullmatch(DEFAULT_FLOAT_RESTRICT, "abc") is None
+        assert re.fullmatch(DEFAULT_FLOAT_RESTRICT, "12.5.6") is None
 
 
 class TestTopLevel:

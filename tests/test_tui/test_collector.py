@@ -164,3 +164,23 @@ class TestEdits:
         original = {"optimizer": {"lr": 0.001, "momentum": 0.9}}
         result = _collect_with_edits(original, {"optimizer_lr": 0.01})
         assert result == {"optimizer": {"lr": 0.01, "momentum": 0.9}}
+
+    def test_empty_int_field_returns_zero(self) -> None:
+        original = {"count": 42}
+        result = _collect_with_edits(original, {"count": ""})
+        assert result == {"count": 0}
+
+    def test_empty_float_field_returns_zero(self) -> None:
+        original = {"ratio": 3.14}
+        result = _collect_with_edits(original, {"ratio": ""})
+        assert result == {"ratio": 0.0}
+
+    def test_empty_int_in_nested_dict_returns_zero(self) -> None:
+        original = {"model": {"layers": 10}}
+        result = _collect_with_edits(original, {"model_layers": ""})
+        assert result == {"model": {"layers": 0}}
+
+    def test_empty_int_in_list_returns_zero(self) -> None:
+        original = {"layers": [10, 20, 30]}
+        result = _collect_with_edits(original, {"layers_1": ""})
+        assert result == {"layers": [10, 0, 30]}
