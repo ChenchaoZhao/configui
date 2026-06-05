@@ -6,9 +6,11 @@ import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from textual.widgets import Collapsible, Header, Switch, Tree
+from textual.widgets import Button, Collapsible, Header, Input, Switch, Tree
 
 from configui.tui.app import ConfigUIApp
+from configui.tui.screens import ResetConfirmScreen, SaveAsScreen
+from configui.tui.widgets import NavigableDirectoryTree
 
 if TYPE_CHECKING:
     from textual.containers import Vertical
@@ -189,6 +191,187 @@ def test_save_as_modal_pushes_and_pops() -> None:
 
                 assert app.screen is not app
                 assert "SaveAsScreen" in type(app.screen).__name__
+
+        asyncio.run(_run())
+    finally:
+        path.unlink(missing_ok=True)
+
+
+def test_save_as_preserves_ui_changes() -> None:
+    path = _create_config(SAMPLE_CONFIG)
+    try:
+
+        async def _run() -> None:
+            app = ConfigUIApp(str(path))
+            async with app.run_test() as pilot:
+                switch = app.query_one(Switch)
+                switch.value = not switch.value
+
+                await pilot.press("ctrl+shift+s")
+                await pilot.pause()
+
+                filename_input = app.screen.query_one("#save-filename", Input)
+                filename_input.value = "saved_copy.json"
+
+                save_btn = app.screen.query_one("#save", Button)
+                save_btn.press()
+                await pilot.pause()
+
+                saved = path.parent / "saved_copy.json"
+                try:
+                    data = json.loads(saved.read_text())
+                    assert data == {
+                        "model": {
+                            "architecture": "resnet50",
+                            "pretrained": False,
+                            "num_classes": 1000,
+                            "dropout": 0.5,
+                        },
+                        "training": {
+                            "batch_size": 64,
+                            "epochs": 100,
+                            "learning_rate": 0.001,
+                            "use_cuda": True,
+                        },
+                    }
+                finally:
+                    saved.unlink(missing_ok=True)
+
+        asyncio.run(_run())
+    finally:
+        path.unlink(missing_ok=True)
+
+
+def test_save_as_relative_path_joins_with_selected_dir() -> None:
+    path = _create_config(SAMPLE_CONFIG)
+    try:
+
+        async def _run() -> None:
+            app = ConfigUIApp(str(path))
+            async with app.run_test() as pilot:
+                await pilot.press("ctrl+shift+s")
+                screen = app.screen
+                assert isinstance(screen, SaveAsScreen)
+                filename_input = screen.query_one("#save-filename", Input)
+                filename_input.value = "custom.json"
+                result = screen._get_save_path()  # noqa: SLF001
+                assert result == path.parent / "custom.json"
+
+        asyncio.run(_run())
+    finally:
+        path.unlink(missing_ok=True)
+
+
+def test_save_as_absolute_path_uses_directly() -> None:
+    path = _create_config(SAMPLE_CONFIG)
+    try:
+
+        async def _run() -> None:
+            app = ConfigUIApp(str(path))
+            async with app.run_test() as pilot:
+                await pilot.press("ctrl+shift+s")
+                screen = app.screen
+                assert isinstance(screen, SaveAsScreen)
+                filename_input = screen.query_one("#save-filename", Input)
+                filename_input.value = "/tmp/foo.json"
+                result = screen._get_save_path()  # noqa: SLF001
+                assert result == Path("/tmp/foo.json")
+
+        asyncio.run(_run())
+    finally:
+        path.unlink(missing_ok=True)
+
+
+def test_save_as_tilde_path_expands_home() -> None:
+    path = _create_config(SAMPLE_CONFIG)
+    try:
+
+        async def _run() -> None:
+            app = ConfigUIApp(str(path))
+            async with app.run_test() as pilot:
+                await pilot.press("ctrl+shift+s")
+                screen = app.screen
+                assert isinstance(screen, SaveAsScreen)
+                filename_input = screen.query_one("#save-filename", Input)
+                filename_input.value = "~/Downloads/config.yaml"
+                result = screen._get_save_path()  # noqa: SLF001
+                assert result == Path.home() / "Downloads" / "config.yaml"
+
+        asyncio.run(_run())
+    finally:
+        path.unlink(missing_ok=True)
+
+
+def test_save_as_empty_filename_returns_none() -> None:
+    path = _create_config(SAMPLE_CONFIG)
+    try:
+
+        async def _run() -> None:
+            app = ConfigUIApp(str(path))
+            async with app.run_test() as pilot:
+                await pilot.press("ctrl+shift+s")
+                screen = app.screen
+                assert isinstance(screen, SaveAsScreen)
+                filename_input = screen.query_one("#save-filename", Input)
+                filename_input.value = ""
+                result = screen._get_save_path()  # noqa: SLF001
+                assert result is None
+
+        asyncio.run(_run())
+    finally:
+        path.unlink(missing_ok=True)
+
+
+def test_save_as_dotdot_navigates_to_parent() -> None:
+    path = _create_config(SAMPLE_CONFIG)
+    try:
+
+        async def _run() -> None:
+            app = ConfigUIApp(str(path))
+            async with app.run_test() as pilot:
+                await pilot.press("ctrl+shift+s")
+                screen = app.screen
+                assert isinstance(screen, SaveAsScreen)
+
+                tree = screen.query_one("#save-directory-tree", NavigableDirectoryTree)
+                initial_root = Path(str(tree.path))
+
+                # Navigate to ".." (first child of root) and select it
+                await pilot.press("down")
+                await pilot.press("enter")
+                await pilot.pause()
+
+                assert Path(str(tree.path)) == initial_root.parent
+
+                # Go up another level
+                await pilot.press("down")
+                await pilot.press("enter")
+                await pilot.pause()
+
+                assert Path(str(tree.path)) == initial_root.parent.parent
+
+        asyncio.run(_run())
+    finally:
+        path.unlink(missing_ok=True)
+
+
+def test_reset_all_shows_confirmation_when_dirty() -> None:
+    path = _create_config(SAMPLE_CONFIG)
+    try:
+
+        async def _run() -> None:
+            app = ConfigUIApp(str(path))
+            async with app.run_test() as pilot:
+                await pilot.pause()
+                switch = app.query_one(Switch)
+                switch.value = not switch.value
+                await pilot.pause()
+                assert app._dirty  # noqa: SLF001
+
+                await pilot.press("ctrl+r")
+                await pilot.pause()
+
+                assert isinstance(app.screen, ResetConfirmScreen)
 
         asyncio.run(_run())
     finally:

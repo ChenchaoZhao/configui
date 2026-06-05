@@ -5,7 +5,9 @@ from typing import TYPE_CHECKING
 
 from textual.containers import Vertical
 from textual.screen import Screen
-from textual.widgets import Button, DirectoryTree, Input, Label, Static
+from textual.widgets import Button, Input, Label, Static
+
+from configui.tui.widgets import NavigableDirectoryTree
 
 if TYPE_CHECKING:
     from textual.app import ComposeResult
@@ -21,7 +23,12 @@ class ConfirmExitScreen(Screen[bool]):
         width: 50;
         height: auto;
         padding: 2;
-        border: solid $primary;
+        border: round $primary;
+    }
+
+    #confirm-exit-box > Label {
+        text-align: center;
+        margin: 1 0 2 0;
     }
     """
 
@@ -38,6 +45,38 @@ class ConfirmExitScreen(Screen[bool]):
             self.dismiss(False)
 
 
+class ResetConfirmScreen(Screen[bool]):
+    CSS = """
+    ResetConfirmScreen {
+        align: center middle;
+    }
+
+    #reset-confirm-box {
+        width: 50;
+        height: auto;
+        padding: 2;
+        border: round $primary;
+    }
+
+    #reset-confirm-box > Label {
+        text-align: center;
+        margin: 1 0 2 0;
+    }
+    """
+
+    def compose(self) -> ComposeResult:
+        with Vertical(id="reset-confirm-box"):
+            yield Label("Reset all fields to their original values?")
+            yield Button("Cancel", variant="primary", id="cancel")
+            yield Button("Reset All", variant="error", id="reset")
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "reset":
+            self.dismiss(True)
+        else:
+            self.dismiss(False)
+
+
 class SaveAsScreen(Screen[Path | None]):
     CSS = """
     SaveAsScreen {
@@ -48,28 +87,36 @@ class SaveAsScreen(Screen[Path | None]):
         width: 80;
         height: auto;
         padding: 2;
-        border: solid $primary;
+        border: round $primary;
+    }
+
+    #save-as-box > Label {
+        text-align: center;
+        text-style: bold;
+        margin: 0 0 1 0;
     }
 
     #save-directory-tree {
         height: 20;
-        border: solid $surface;
+        width: 1fr;
+        border: round $surface;
     }
 
     #save-filename {
         margin: 1 0;
+        border: round $primary;
+    }
+
+    #save-filename:focus {
+        border: round $primary;
     }
 
     #save-path-preview {
         margin: 1 0;
     }
 
-    #save-as-buttons {
-        align: right middle;
-    }
-
-    Button {
-        margin: 0 1;
+    #save-as-box > Button {
+        margin: 1 0 0 0;
     }
     """
 
@@ -81,7 +128,7 @@ class SaveAsScreen(Screen[Path | None]):
     def compose(self) -> ComposeResult:
         with Vertical(id="save-as-box"):
             yield Label("Save As")
-            yield DirectoryTree(str(self._current_path.parent), id="save-directory-tree")
+            yield NavigableDirectoryTree(str(self._current_path.parent), id="save-directory-tree")
             yield Input(value=self._current_path.name, id="save-filename", placeholder="Filename")
             yield Static(id="save-path-preview")
             yield Button("Browse", id="browse")
@@ -95,7 +142,13 @@ class SaveAsScreen(Screen[Path | None]):
         filename = self.query_one("#save-filename", Input).value.strip()
         if not filename:
             return None
-        return self._selected_dir / filename
+        try:
+            candidate = Path(filename).expanduser()
+        except RuntimeError:
+            return None
+        if candidate.is_absolute():
+            return candidate
+        return self._selected_dir / candidate
 
     def _update_preview(self) -> None:
         save_path = self._get_save_path()
@@ -108,10 +161,10 @@ class SaveAsScreen(Screen[Path | None]):
     def on_input_changed(self, _event: Input.Changed) -> None:
         self._update_preview()
 
-    def on_directory_tree_node_selected(self, event: DirectoryTree.NodeSelected) -> None:
-        node_data = event.node.data
-        if node_data is not None and isinstance(node_data, Path) and node_data.is_dir():
-            self._selected_dir = node_data
+    def on_directory_tree_directory_selected(self, event: NavigableDirectoryTree.DirectorySelected) -> None:
+        self._selected_dir = event.path
+        tree = self.query_one("#save-directory-tree", NavigableDirectoryTree)
+        tree.path = event.path
         self._update_preview()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
@@ -122,4 +175,4 @@ class SaveAsScreen(Screen[Path | None]):
         elif event.button.id == "cancel":
             self.dismiss(None)
         elif event.button.id == "browse":
-            self.query_one("#save-directory-tree", DirectoryTree).focus()
+            self.query_one("#save-directory-tree", NavigableDirectoryTree).focus()
