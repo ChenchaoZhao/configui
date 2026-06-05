@@ -41,7 +41,8 @@ def _make_scalar_row(
     else:
         widget = Input(type="text", value=str(value), id=widget_id, restrict=restrict)
 
-    return Horizontal(Static(label), widget)
+    widget.add_class("scalar-input")
+    return Horizontal(Static(label, classes="scalar-label"), widget, classes="scalar-row")
 
 
 def _map_value(
@@ -57,14 +58,14 @@ def _map_value(
 
     if isinstance(value, dict):
         children = [_map_value(k, v, prefix=dotted_path, regex_overrides=overrides) for k, v in value.items()]
-        return Collapsible(*children, title=key, id=wid, classes="container-dict")
+        return Collapsible(*children, title=key, id=wid, classes="container-dict", collapsed=False)
 
     if isinstance(value, list):
         children = [
             _map_value(str(i), item, prefix=dotted_path, regex_overrides=overrides) for i, item in enumerate(value)
         ]
         title = f"{key} [{len(value)}]"
-        return Collapsible(*children, title=title, id=wid, classes="container-list")
+        return Collapsible(*children, title=title, id=wid, classes="container-list", collapsed=False)
 
     restrict = overrides.get(dotted_path)
     return _make_scalar_row(key, value, widget_id=wid, restrict=restrict)

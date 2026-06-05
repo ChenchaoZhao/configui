@@ -4,6 +4,7 @@
 # - pytest
 # - mypy
 # - ruff
+# - click>=8.1.0
 # - textual>=1.0.0
 # - ruamel.yaml>=0.18.0
 # - tomlkit>=0.13.0
@@ -11,6 +12,8 @@
 
 ast-serialize==0.3.0
     # via mypy
+click==8.4.1
+    # via hatch.envs.default
 iniconfig==2.3.0
     # via pytest
 librt==0.11.0
