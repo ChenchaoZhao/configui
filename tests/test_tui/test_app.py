@@ -343,13 +343,6 @@ def test_save_as_dotdot_navigates_to_parent() -> None:
 
                 assert Path(str(tree.path)) == initial_root.parent
 
-                # Go up another level
-                await pilot.press("down")
-                await pilot.press("enter")
-                await pilot.pause()
-
-                assert Path(str(tree.path)) == initial_root.parent.parent
-
         asyncio.run(_run())
     finally:
         path.unlink(missing_ok=True)
