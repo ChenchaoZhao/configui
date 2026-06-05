@@ -1,7 +1,7 @@
 # ConfigUI
 
 [![CI](https://github.com/chenchaozhao/configui/actions/workflows/tests.yml/badge.svg)](https://github.com/chenchaozhao/configui/actions/workflows/tests.yml)
-[![PyPI version](https://img.shields.io/pypi/v/configui)](https://pypi.org/project/configui/)
+[![PyPI version](https://img.shields.io/pypi/v/configui?cacheSeconds=120)](https://pypi.org/project/configui/)
 [![Python](https://img.shields.io/badge/python-3.12%20|%203.13-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
