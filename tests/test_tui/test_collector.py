@@ -184,3 +184,18 @@ class TestEdits:
         original = {"layers": [10, 20, 30]}
         result = _collect_with_edits(original, {"layers_1": ""})
         assert result == {"layers": [10, 0, 30]}
+
+
+class TestSpecialCharacters:
+    def test_dollar_schema_roundtrip(self) -> None:
+        original = {"$schema": "https://json-schema.org/draft-07/schema#", "type": "object"}
+        assert _roundtrip(original) == original
+
+    def test_dollar_in_nested_key_roundtrip(self) -> None:
+        original = {"config": {"$ref": "#/definitions/Foo", "name": "bar"}}
+        assert _roundtrip(original) == original
+
+    def test_dollar_schema_edit(self) -> None:
+        original = {"$schema": "https://json-schema.org/draft-07/schema#", "version": "1.0"}
+        result = _collect_with_edits(original, {"_schema": "https://json-schema.org/draft-07/schema#"})
+        assert result == original

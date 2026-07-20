@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING, Any
 
 from textual.containers import Horizontal, Vertical
@@ -18,7 +19,10 @@ DEFAULT_FLOAT_RESTRICT: str = r"^-?\d*(\.\d*)?([eE][+-]?\d+)?$"
 
 def _safe_id(prefix: str, key: str) -> str:
     raw = f"{prefix}_{key}" if prefix else key
-    return raw.replace(".", "_")
+    sanitized = re.sub(r"[^a-zA-Z0-9_-]", "_", raw)
+    if sanitized and sanitized[0].isdigit():
+        sanitized = f"_{sanitized}"
+    return sanitized
 
 
 def _make_scalar_row(
